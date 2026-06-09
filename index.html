@@ -3,155 +3,173 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TFT 게임플레이 툴 (세트17)</title>
+<title>TFT 세트17 게임플레이 툴</title>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #21262d;
-    --border: #30363d;
-    --accent: #c9a227;
-    --accent2: #7c5cbf;
-    --text: #e6edf3;
-    --text-dim: #8b949e;
-    --green: #3fb950;
-    --red: #f85149;
-    --blue: #58a6ff;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; font-size: 14px; }
-
-  .header { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); padding: 20px 24px; border-bottom: 1px solid var(--border); }
-  .header h1 { font-size: 22px; color: var(--accent); letter-spacing: 1px; }
-  .header p { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
-
-  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .tab-btn { padding: 14px 24px; cursor: pointer; border: none; background: none; color: var(--text-dim); font-size: 14px; font-family: inherit; border-bottom: 2px solid transparent; transition: all 0.2s; }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab-btn:hover:not(.active) { color: var(--text); background: var(--surface2); }
-
-  .tab-content { display: none; padding: 20px; max-width: 1100px; margin: 0 auto; }
-  .tab-content.active { display: block; }
-
-  /* EMBLEM TAB */
-  .emblem-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-  .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 12px; }
-  .emblem-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .emblem-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; transition: all 0.18s; user-select: none; display: flex; align-items: center; gap: 10px; }
-  .emblem-card:hover { border-color: var(--accent); }
-  .emblem-card.selected { border-color: var(--accent); background: #2a2010; box-shadow: 0 0 0 1px var(--accent); }
-  .emblem-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .emblem-name { font-size: 13px; font-weight: 500; }
-  .emblem-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; margin-left: auto; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-  .emblem-card.selected .emblem-check { background: var(--accent); border-color: var(--accent); }
-  .emblem-card.selected .emblem-check::after { content: '✓'; color: #000; font-size: 10px; font-weight: bold; }
-
-  .result-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .result-empty { text-align: center; color: var(--text-dim); padding: 60px 20px; }
-  .result-empty .hint { font-size: 28px; margin-bottom: 12px; }
-
-  .deck-result { animation: fadeIn 0.25s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .deck-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .deck-name { font-size: 20px; font-weight: bold; color: var(--accent); }
-  .deck-badge { font-size: 11px; padding: 3px 8px; border-radius: 12px; background: var(--accent2); color: #fff; }
-
-  .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-  .info-box { background: var(--surface2); border-radius: 8px; padding: 14px; border: 1px solid var(--border); margin-bottom: 12px; }
-  .info-box-title { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-
-  .unit-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .unit-chip { background: #1c2128; border: 1px solid var(--border); border-radius: 16px; padding: 4px 10px; font-size: 12px; }
-  .unit-chip.carry { border-color: var(--accent); color: var(--accent); background: #2a2010; }
-  .unit-chip.tank { border-color: var(--blue); color: var(--blue); background: #101a2a; }
-
-  .tip-list { list-style: none; }
-  .tip-list li { padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 13px; }
-  .tip-list li:last-child { border-bottom: none; }
-  .tip-list li::before { content: '·  '; color: var(--accent); }
-
-  /* ITEM styles */
-  .item-unit { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .item-unit:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-  .item-unit-name { font-size: 13px; font-weight: 600; margin-bottom: 7px; display: flex; align-items: center; gap: 7px; }
-  .role-pill { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
-  .role-carry   { background: #2a1a00; color: var(--accent); border: 1px solid #5a3a00; }
-  .role-tank    { background: #001a2a; color: var(--blue);   border: 1px solid #004a6a; }
-  .role-support { background: #001a10; color: var(--green);  border: 1px solid #004a20; }
-  .item-row-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .item-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
-  .item-tag { border-radius: 4px; padding: 3px 9px; font-size: 11px; }
-  .item-tag.main { background: #1e1a0e; border: 1px solid #5a3a00; color: #e6c870; }
-  .item-tag.alt  { background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); }
-
-  .synergy-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .synergy-tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; background: var(--surface2); border: 1px solid var(--border); }
-
-  .multi-result { display: flex; flex-direction: column; gap: 10px; }
-  .candidate { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
-  .candidate-rank { font-size: 10px; color: var(--text-dim); margin-bottom: 3px; }
-  .candidate-name { font-size: 15px; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-  .candidate-reason { font-size: 12px; color: var(--text-dim); }
-
-  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .tag { padding: 4px 10px; border-radius: 12px; font-size: 12px; background: var(--surface2); border: 1px solid var(--border); }
-  .tag.selected-emblem { background: #2a2010; border-color: var(--accent); color: var(--accent); }
-
-  .reset-btn { margin-top: 14px; padding: 8px 18px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.15s; }
-  .reset-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* EARLY TAB */
-  .early-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .deck-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
-  .deck-card-header { background: var(--surface2); padding: 13px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-  .deck-card-header:hover { background: #2a2f38; }
-  .deck-card-title { font-size: 14px; font-weight: 600; }
-  .deck-card-body { padding: 14px 16px; display: none; }
-  .deck-card-body.open { display: block; }
-  .expand-icon { color: var(--text-dim); transition: transform 0.2s; font-size: 12px; }
-  .deck-card-header.open .expand-icon { transform: rotate(180deg); }
-
-  .priority-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-  .priority-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 10px; background: var(--surface2); border-radius: 6px; border-left: 3px solid transparent; }
-  .priority-item.high { border-left-color: var(--accent); }
-  .priority-item.mid  { border-left-color: var(--blue); }
-  .priority-item.low  { border-left-color: var(--text-dim); }
-  .priority-num { font-size: 11px; color: var(--text-dim); min-width: 20px; padding-top: 1px; }
-  .priority-text { font-size: 13px; line-height: 1.5; }
-
-  .level-guide { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .level-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; text-align: center; }
-  .level-step .stage { color: var(--text-dim); font-size: 10px; }
-  .level-step .lv { color: var(--accent); font-weight: bold; }
-
-  /* AUGMENT TAB */
-  .augment-guide { background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
-  .augment-tier { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 8px; }
-  .tier-silver { background: #4a5568; color: #e2e8f0; }
-  .tier-gold   { background: #744210; color: #fbd38d; }
-  .tier-prisma { background: #44337a; color: #d6bcfa; }
-  .augment-items { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-  .augment-item { font-size: 12px; padding: 3px 8px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border); }
-  .augment-item.star { border-color: var(--accent); color: var(--accent); }
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--accent:#c9a227;--accent2:#7c5cbf;--text:#e6edf3;--text-dim:#8b949e;--green:#3fb950;--red:#f85149;--blue:#58a6ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:18px 24px;border-bottom:1px solid var(--border)}
+.header h1{font-size:20px;color:var(--accent)}
+.header p{color:var(--text-dim);font-size:12px;margin-top:3px}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto}
+.tab-btn{padding:13px 22px;cursor:pointer;border:none;background:none;color:var(--text-dim);font-size:13px;font-family:inherit;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text);background:var(--surface2)}
+.tab-content{display:none;padding:20px;max-width:1200px;margin:0 auto}
+.tab-content.active{display:block}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px}
+.info-box{background:var(--surface2);border-radius:8px;padding:14px;border:1px solid var(--border);margin-bottom:12px}
+.info-box-title{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+/* EMBLEM */
+.emblem-layout{display:grid;grid-template-columns:320px 1fr;gap:20px}
+.emblem-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.emblem-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;user-select:none}
+.emblem-card:hover{border-color:var(--accent)}
+.emblem-card.selected{border-color:var(--accent);background:#2a2010}
+.emblem-icon{font-size:16px;flex-shrink:0}
+.emblem-name{font-size:12px;font-weight:500}
+.emblem-check{width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;margin-left:auto;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.emblem-card.selected .emblem-check{background:var(--accent);border-color:var(--accent)}
+.emblem-card.selected .emblem-check::after{content:"✓";color:#000;font-size:9px;font-weight:bold}
+.result-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.result-empty{text-align:center;color:var(--text-dim);padding:50px 20px}
+.deck-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.deck-name{font-size:18px;font-weight:bold;color:var(--accent)}
+.deck-badge{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--accent2);color:#fff}
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.unit-chips{display:flex;flex-wrap:wrap;gap:5px}
+.unit-chip{background:#1c2128;border:1px solid var(--border);border-radius:14px;padding:3px 9px;font-size:11px}
+.unit-chip.carry{border-color:var(--accent);color:var(--accent);background:#2a2010}
+.unit-chip.tank{border-color:var(--blue);color:var(--blue);background:#101a2a}
+.tip-list{list-style:none}
+.tip-list li{padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-dim);font-size:12px}
+.tip-list li:last-child{border-bottom:none}
+.tip-list li::before{content:"· ";color:var(--accent)}
+.role-pill{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:500}
+.role-carry{background:#2a1a00;color:var(--accent);border:1px solid #5a3a00}
+.role-tank{background:#001a2a;color:var(--blue);border:1px solid #004a6a}
+.role-support{background:#001a10;color:var(--green);border:1px solid #004a20}
+.item-unit{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.item-unit:last-child{margin:0;padding:0;border:none}
+.item-unit-name{font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.item-row-label{font-size:10px;color:var(--text-dim);margin-bottom:3px}
+.item-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+.item-tag{border-radius:4px;padding:2px 8px;font-size:11px}
+.item-tag.main{background:#1e1a0e;border:1px solid #5a3a00;color:#e6c870}
+.item-tag.alt{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
+.reset-btn{margin-top:12px;padding:7px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.reset-btn:hover{border-color:var(--red);color:var(--red)}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tag{padding:3px 9px;border-radius:10px;font-size:11px;background:var(--surface2);border:1px solid var(--border)}
+.tag.selected-emblem{background:#2a2010;border-color:var(--accent);color:var(--accent)}
+/* EARLY */
+.early-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.deck-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.deck-card-header{background:var(--surface2);padding:12px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.deck-card-header:hover{background:#2a2f38}
+.deck-card-title{font-size:13px;font-weight:600}
+.deck-card-body{padding:13px 15px;display:none}
+.deck-card-body.open{display:block}
+.expand-icon{color:var(--text-dim);transition:transform .2s;font-size:11px}
+.deck-card-header.open .expand-icon{transform:rotate(180deg)}
+.priority-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.priority-item{display:flex;align-items:flex-start;gap:8px;padding:6px 9px;background:var(--surface2);border-radius:5px;border-left:3px solid transparent}
+.priority-item.high{border-left-color:var(--accent)}
+.priority-item.mid{border-left-color:var(--blue)}
+.priority-item.low{border-left-color:var(--text-dim)}
+.priority-num{font-size:10px;color:var(--text-dim);min-width:18px;padding-top:1px}
+.priority-text{font-size:12px;line-height:1.5}
+.level-guide{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.level-step{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:4px 9px;font-size:11px;text-align:center}
+.level-step .stage{color:var(--text-dim);font-size:10px}
+.level-step .lv{color:var(--accent);font-weight:bold}
+/* AUGMENT */
+.augment-guide{background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:10px}
+.augment-tier{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:bold;margin-right:7px}
+.tier-silver{background:#4a5568;color:#e2e8f0}
+.tier-gold{background:#744210;color:#fbd38d}
+.tier-prisma{background:#44337a;color:#d6bcfa}
+.augment-items{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.augment-item{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface);border:1px solid var(--border)}
+.augment-item.star{border-color:var(--accent);color:var(--accent)}
+/* META DECK */
+.meta-deck-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.meta-deck-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;transition:background .15s;user-select:none}
+.meta-deck-header:hover{background:var(--surface2)}
+.meta-deck-title{font-size:15px;font-weight:bold;color:var(--accent)}
+.hot-badge{background:#5a1a00;color:#ff6b35;border:1px solid #ff6b35;border-radius:10px;font-size:10px;padding:2px 7px}
+.diff-badge{border:1px solid;border-radius:10px;font-size:10px;padding:2px 7px}
+.diff-easy{border-color:var(--green);color:var(--green)}
+.diff-medium{border-color:var(--accent);color:var(--accent)}
+.diff-hard{border-color:var(--red);color:var(--red)}
+.meta-header-synergies{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+.syn-chip{font-size:10px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;white-space:nowrap}
+.expand-arrow{color:var(--text-dim);font-size:11px;flex-shrink:0;margin-left:6px;transition:transform .2s}
+.meta-deck-card.open .expand-arrow{transform:rotate(180deg)}
+.meta-deck-body{display:none;border-top:1px solid var(--border)}
+.meta-deck-card.open .meta-deck-body{display:block}
+.meta-body-inner{display:grid;grid-template-columns:150px 1fr 270px;gap:0}
+.meta-col-synergy{padding:16px 14px;border-right:1px solid var(--border)}
+.meta-col-board{padding:16px 14px}
+.meta-col-items{padding:16px 14px;border-left:1px solid var(--border)}
+.syn-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #1e2430;font-size:12px}
+.syn-row:last-child{border-bottom:none}
+.syn-count-badge{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:11px;font-weight:bold;min-width:24px;text-align:center}
+.syn-count-badge.active{background:#2a2010;border-color:var(--accent);color:var(--accent)}
+/* HEX BOARD */
+.hex-board{background:#090d12;border-radius:10px;padding:10px 6px;display:inline-block}
+.hex-row{display:flex;margin-bottom:3px}
+.hex-row.offset{margin-left:32px}
+.hex{width:56px;height:56px;margin:0 3px;flex-shrink:0}
+.hex-inner{width:100%;height:100%;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hex.empty .hex-inner{background:#131820;opacity:.35}
+.hex.carry .hex-inner{background:#2d1e00}
+.hex.tank .hex-inner{background:#001b2e}
+.hex.support .hex-inner{background:#1a0d2e}
+.hex-name{font-size:9.5px;font-weight:600;text-align:center;padding:0 3px;line-height:1.25}
+.hex.carry .hex-name{color:#f0c040}
+.hex.tank .hex-name{color:#60a0e0}
+.hex.support .hex-name{color:#a070e0}
+.hex-dot{width:5px;height:5px;border-radius:50%;margin-top:3px}
+.hex.carry .hex-dot{background:var(--accent)}
+.hex.tank .hex-dot{background:var(--blue)}
+.hex.support .hex-dot{background:var(--accent2)}
+/* META ITEMS/GUIDE */
+.meta-champ-item{margin-bottom:13px;padding-bottom:13px;border-bottom:1px solid var(--border)}
+.meta-champ-item:last-child{margin:0;padding:0;border:none}
+.meta-champ-name{font-size:12px;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.item-pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px}
+.item-pill{font-size:10px;padding:2px 7px;border-radius:4px}
+.item-pill.main{background:#1e1a0e;border:1px solid #5a3a00;color:#e6c870}
+.item-pill.alt{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
+.item-pill-label{font-size:9px;color:var(--text-dim);margin-bottom:2px}
+.meta-bottom{border-top:1px solid var(--border);padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.meta-guide-title{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.guide-list{list-style:none}
+.guide-list li{font-size:12px;color:var(--text-dim);padding:3px 0;border-bottom:1px solid #1e2430}
+.guide-list li:last-child{border-bottom:none}
+.guide-list li::before{content:"· ";color:var(--accent)}
+.god-pills{display:flex;flex-wrap:wrap;gap:5px}
+.god-pill{font-size:11px;padding:3px 9px;border-radius:5px;background:var(--surface2);border:1px solid var(--accent2);color:var(--accent2)}
+.guide-link-btn{display:inline-block;margin-top:10px;padding:7px 14px;background:var(--surface2);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:11px;text-decoration:none}
+.guide-link-btn:hover{background:#2a2010}
 </style>
 </head>
 <body>
-
 <div class="header">
   <h1>⚔️ TFT 세트17 게임플레이 툴</h1>
-  <p>상징 조합 덱 추천 · 초반 픽 가이드 · 증강 선택 가이드</p>
+  <p>상징 조합 덱 추천 · 초반 빌드업 · 증강 가이드 · 메타 덱</p>
 </div>
-
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('emblem')">🏷️ 상징 → 덱 추천</button>
-  <button class="tab-btn" onclick="switchTab('early')">🎯 초반 빌드업 가이드</button>
-  <button class="tab-btn" onclick="switchTab('augment')">💎 증강 선택 가이드</button>
+  <button class="tab-btn" onclick="switchTab('early')">🎯 초반 빌드업</button>
+  <button class="tab-btn" onclick="switchTab('augment')">💎 증강 가이드</button>
+  <button class="tab-btn" onclick="switchTab('meta')">🔥 메타 덱</button>
 </div>
 
 <!-- TAB 1: EMBLEM -->
 <div id="tab-emblem" class="tab-content active">
-  <p style="color:var(--text-dim);margin-bottom:16px;font-size:13px;">획득한 상징을 선택하면 최적 덱과 아이템 가이드를 추천해 드립니다. 여러 개 선택 가능.</p>
+  <p style="color:var(--text-dim);margin-bottom:14px;font-size:12px;">획득한 상징을 선택하면 최적 덱과 아이템 가이드를 추천해 드립니다.</p>
   <div class="emblem-layout">
     <div>
       <div class="section-title">상징 선택</div>
@@ -161,31 +179,29 @@
     <div>
       <div class="section-title">덱 추천</div>
       <div class="result-panel" id="resultPanel">
-        <div class="result-empty"><div class="hint">🏷️</div><div>상징을 선택하면 덱 추천이 나타납니다</div></div>
+        <div class="result-empty"><div style="font-size:28px;margin-bottom:10px">🏷️</div><div>상징을 선택하면 덱 추천이 나타납니다</div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TAB 2: EARLY GAME -->
+<!-- TAB 2: EARLY -->
 <div id="tab-early" class="tab-content">
   <div class="early-layout">
     <div>
       <div class="section-title">덱별 초반 핵심 기물</div>
-
       <div class="deck-card">
         <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">선봉대 벡스덱</span><span class="expand-icon">▼</span></div>
         <div class="deck-card-body">
           <div class="priority-list">
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>벡스</strong> — 메인 딜러, 탱커 아이템 우선 세팅</span></div>
+            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>벡스</strong> — 메인 딜러, 탱커 아이템 우선</span></div>
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>카르마</strong> — 필수 (6선봉대 활성화)</span></div>
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>누누 or 거대 매크로봇</strong> — 선봉대 코어</span></div>
             <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>일라오이</strong> — 탱커</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>블리츠크랭크</strong> — 선봉대 + 유틸</span></div>
             <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>소나 → 바드</strong> (9레벨에 바드 추가)</span></div>
-            <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">라하스트, 모르가나 대체 가능 / 소나 → 리산드라</span></div>
+            <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">라하스트, 모르가나 대체 가능</span></div>
           </div>
-          <div style="margin-top:4px"><div class="info-box-title" style="color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">레벨업 타이밍</div>
+          <div class="info-box-title" style="margin-top:8px;margin-bottom:5px">레벨업 타이밍</div>
           <div class="level-guide">
             <div class="level-step"><div class="stage">2-1</div><div class="lv">4렙</div></div>
             <div class="level-step"><div class="stage">2-5</div><div class="lv">5렙</div></div>
@@ -193,46 +209,42 @@
             <div class="level-step"><div class="stage">3-5~7</div><div class="lv">7렙</div></div>
             <div class="level-step"><div class="stage">4-2</div><div class="lv">8렙</div></div>
             <div class="level-step"><div class="stage">4-5~5-1</div><div class="lv">9렙</div></div>
-          </div></div>
+          </div>
         </div>
       </div>
-
       <div class="deck-card">
         <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">우주 그루브 덱</span><span class="expand-icon">▼</span></div>
         <div class="deck-card-body">
           <div class="priority-list">
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>리븐</strong> — 메인 캐리, 5우주그루브 목표</span></div>
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>제드</strong> — AP폼 서브 캐리</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text">5 우주그루브 &gt; 7 우주그루브 (7보다 라하스트가 낫다)</span></div>
+            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text">5우주그루브 > 7우주그루브 (7보단 라하스트)</span></div>
             <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">요새 상징 → 리븐에게 (효율 최고)</span></div>
           </div>
         </div>
       </div>
-
       <div class="deck-card">
         <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">코르키 (정령족) 덱</span><span class="expand-icon">▼</span></div>
         <div class="deck-card-body">
           <div class="priority-list">
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>코르키</strong> — 메인 딜러</span></div>
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>밀리오</strong> — 코어 지원 (사이에 배치)</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>리븐</strong> — 여행자 상징 → 리븐, 후반 라하스트/모르가나로</span></div>
+            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>밀리오</strong> — 코어 지원</span></div>
+            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>리븐</strong> — 여행자 상징 부여</span></div>
             <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">노바 상징 → 아이템 다 맞추면 우르곳으로</span></div>
           </div>
         </div>
       </div>
-
       <div class="deck-card">
         <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">별돌보미 자야 덱</span><span class="expand-icon">▼</span></div>
         <div class="deck-card-body">
           <div class="priority-list">
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>자야</strong> — 메인 딜러 (크라켄 2개 목표)</span></div>
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text">4시균자 + 3별돌보미 조합 목표</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>누누, 탈론, 모데(선봉대), 탐켄치(싸움꾼)</strong></span></div>
-            <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">별돌보미 순서: 산 → 메달 → 우물 → 뱀</span></div>
+            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>누누, 탈론, 모데, 탐켄치</strong></span></div>
+            <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">별돌보미 순서: 산→메달→우물→뱀</span></div>
           </div>
         </div>
       </div>
-
       <div class="deck-card">
         <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">싸움꾼 마이 덱</span><span class="expand-icon">▼</span></div>
         <div class="deck-card-body">
@@ -240,77 +252,20 @@
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>마이</strong> — 싸움꾼 상징 부여, 6싸움꾼 활성화</span></div>
             <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>킨드레드</strong> — 딜템 집중 세팅</span></div>
             <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text"><strong>우르곳</strong> — 노바 상징/딜템 몰아주기</span></div>
-            <div class="priority-item low"><span class="priority-num">★</span><span class="priority-text">도전자: 우르곳 or 미포 / 태고족 → 탱커에게</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="deck-card">
-        <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">6 선봉대 덱</span><span class="expand-icon">▼</span></div>
-        <div class="deck-card-body">
-          <div class="priority-list">
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>카르마 + 꼬정</strong> 필수</span></div>
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text">선봉대 5마리 + 르블랑 or 소나</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text">꼬정에게 선봉대 상징 → 6선봉대 즉시 세팅</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="deck-card">
-        <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">6 암흑의 별 덱</span><span class="expand-icon">▼</span></div>
-        <div class="deck-card-body">
-          <div class="priority-list">
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>카이사</strong>(리롤→리븐) / <strong>자야</strong> / <strong>아우솔</strong>(AP템 多)</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text">암별 상징 → 딜러 아무나에게</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="deck-card">
-        <div class="deck-card-header" onclick="toggleDeck(this)"><span class="deck-card-title">킨드레드 (습격자) 덱</span><span class="expand-icon">▼</span></div>
-        <div class="deck-card-body">
-          <div class="priority-list">
-            <div class="priority-item high"><span class="priority-num">★★★</span><span class="priority-text"><strong>킨드레드</strong> — 구인수 + 습격자상징 크라켄 + 라위 방파</span></div>
-            <div class="priority-item mid"><span class="priority-num">★★</span><span class="priority-text">습격자 상징 확보 시 즉시 전환</span></div>
           </div>
         </div>
       </div>
     </div>
-
     <div>
       <div class="section-title">초반 공통 전략</div>
-      <div class="info-box" style="margin-bottom:14px">
-        <div class="info-box-title">초반 빌드업 원칙 (1~3스테이지)</div>
-        <ul class="tip-list">
-          <li>2성 딜러 기물에 아이템 바로 소비</li>
-          <li>전투증강 선택 후 50골드 킵 욕심 자제</li>
-          <li>돈 쓰며 빠른 렙업으로 템포 잡기</li>
-          <li>태고족·초능력·암별 등 초반 유리한 시너지 활용</li>
-          <li>2~3스테이지 연승 후 4스테이지에 정찰, 대깨칠지 판단</li>
-        </ul>
+      <div class="info-box"><div class="info-box-title">초반 빌드업 원칙 (1~3스테이지)</div>
+        <ul class="tip-list"><li>2성 딜러 기물에 아이템 바로 소비</li><li>전투증강 선택 후 50골드 킵 욕심 자제</li><li>돈 쓰며 빠른 렙업으로 템포 잡기</li><li>태고족·초능력·암별 등 초반 유리한 시너지 활용</li></ul>
       </div>
-      <div class="info-box" style="margin-bottom:14px">
-        <div class="info-box-title">우선 순위 상징 (영증 상징)</div>
-        <ul class="tip-list">
-          <li>우주그루브, 싸움꾼, 여행자, 불한당, 암흑의 별 → 강력</li>
-          <li>아이템: 구인수, 쇼진, 보건 → 즉시 가치 높음</li>
-        </ul>
+      <div class="info-box"><div class="info-box-title">우선 순위 상징</div>
+        <ul class="tip-list"><li>우주그루브, 싸움꾼, 여행자, 불한당, 암흑의 별 → 강력</li><li>아이템: 구인수, 쇼진, 보건 → 즉시 가치 높음</li></ul>
       </div>
-      <div class="info-box" style="margin-bottom:14px">
-        <div class="info-box-title">망한 초반 대처법</div>
-        <ul class="tip-list">
-          <li>2성도 없고, 템도 애매하고, 영증상징도 못 먹은 경우</li>
-          <li>돈 증강 먹고 8렙 → 4-1~4-2에 8렙 찍고 덱 마무리</li>
-          <li>다 망한 경우: 3-5에 전투증강 먹고 4스테이지 전승 노리며 순방각</li>
-        </ul>
-      </div>
-      <div class="info-box">
-        <div class="info-box-title">별돌보미 순서</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.8">
-          ① 산 → ② 메달 → ③ 우물 → ④ 뱀<br>
-          <span style="color:var(--accent);font-size:12px">산일 때: 별 바로 3마리 써서 6렙 리롤 적당히, 7렙 마무리, 3성 다 찍기</span><br>
-          룰루 템: 구인수 · 쇼진 · 복원
-        </div>
+      <div class="info-box"><div class="info-box-title">망한 초반 대처법</div>
+        <ul class="tip-list"><li>2성도 없고 템도 애매하고 영증상징도 못 먹은 경우</li><li>돈 증강 먹고 8렙 → 4-1~4-2에 8렙 찍고 덱 마무리</li><li>다 망한 경우: 3-5 전투증강 먹고 4스테이지 전승 노리며 순방각</li></ul>
       </div>
     </div>
   </div>
@@ -319,303 +274,269 @@
 <!-- TAB 3: AUGMENT -->
 <div id="tab-augment" class="tab-content">
   <div style="max-width:760px">
-    <div class="section-title">1번째 증강 선택 가이드</div>
+    <div class="section-title">2번째 증강 선택 가이드</div>
     <div class="augment-guide">
-      <div><span class="augment-tier tier-gold">추천</span><strong>빌드업 강할 때: 2</strong></div>
-      <ul class="tip-list" style="margin-top:8px">
-        <li>2성 딜러에 템 바로 소비, 당장 쓸 수 있는 아이템·전투증강 선택</li>
-        <li>50골드 킵 욕심 자제, 돈 쓰며 빠른 렙업</li>
-      </ul>
+      <div style="margin-bottom:6px"><span class="augment-tier tier-silver">실버</span><span style="color:var(--text-dim);font-size:11px">약간 신비한 주사위 / 재생의 바람 / 후반 전문가 / 은수저</span></div>
+      <div style="margin-bottom:6px"><span class="augment-tier tier-gold">골드</span><span style="color:var(--text-dim);font-size:11px">보석 연꽃 I ⭐ / 도금 강철 ⭐ / 후반 성장 ⭐ / 마법 주사위</span></div>
+      <div><span class="augment-tier tier-prisma">프리즘</span><span style="color:var(--text-dim);font-size:11px">레벨 업! ⭐ / 출세가도 ⭐ / 거대하고 강력한 / 파묻힌 보물</span></div>
     </div>
-
-    <div class="section-title" style="margin-top:20px">2번째 증강 선택 가이드</div>
-    <div class="augment-guide">
-      <div style="margin-bottom:8px"><span class="augment-tier tier-silver">실버</span><span style="color:var(--text-dim);font-size:12px">약간 신비한 주사위 / 재생의 바람 / 후반 전문가 / 은수저 / 예비 활</span></div>
-      <div style="margin-bottom:8px"><span class="augment-tier tier-gold">골드</span><span style="color:var(--text-dim);font-size:12px">보석 연꽃 I ⭐ / 도금 강철 ⭐ / 후반 성장 ⭐ / 마법 주사위 / 재빠른 무장</span></div>
-      <div><span class="augment-tier tier-prisma">프리즘</span><span style="color:var(--text-dim);font-size:12px">레벨 업! ⭐ / 출세가도 ⭐ / 거대하고 강력한 / 파묻힌 보물 / 넘치는 지팡이</span></div>
-    </div>
-
-    <div class="section-title" style="margin-top:20px">두번째 증강 특수 픽 (순방각)</div>
-    <div class="augment-guide">
-      <ul class="tip-list">
-        <li><strong>임무재시작 / 새로고침의 날 / 미래지향적 사고</strong></li>
-        <li><strong>서사적 새로고침 / 우주적 재시작</strong></li>
-        <li>다 망한 경우: 3-5에 전투증강 먹고 4스테이지 전승 노리며 순방</li>
-      </ul>
-    </div>
-
-    <div class="section-title" style="margin-top:20px">선봉대 벡스덱 전용 증강</div>
+    <div class="section-title" style="margin-top:18px">선봉대 벡스덱 전용 증강</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="augment-guide">
-        <span class="augment-tier tier-silver">실버</span>
-        <div class="augment-items">
-          <span class="augment-item">약간 신비한 주사위</span><span class="augment-item">재생의 바람</span>
-          <span class="augment-item star">후반 전문가</span><span class="augment-item">은수저</span><span class="augment-item">예비 활</span>
-        </div>
-      </div>
-      <div class="augment-guide">
-        <span class="augment-tier tier-gold">골드</span>
-        <div class="augment-items">
-          <span class="augment-item star">보석 연꽃 I</span><span class="augment-item star">도금 강철</span>
-          <span class="augment-item star">후반 성장</span><span class="augment-item">마법 주사위</span><span class="augment-item">생일 모임</span>
-        </div>
-      </div>
-      <div class="augment-guide">
-        <span class="augment-tier tier-prisma">프리즘</span>
-        <div class="augment-items">
-          <span class="augment-item star">레벨 업!</span><span class="augment-item star">출세가도</span>
-          <span class="augment-item">거대하고 강력한</span><span class="augment-item">영혼 각성</span>
-        </div>
-      </div>
+      <div class="augment-guide"><span class="augment-tier tier-silver">실버</span><div class="augment-items"><span class="augment-item">약간 신비한 주사위</span><span class="augment-item">재생의 바람</span><span class="augment-item star">후반 전문가</span><span class="augment-item">은수저</span></div></div>
+      <div class="augment-guide"><span class="augment-tier tier-gold">골드</span><div class="augment-items"><span class="augment-item star">보석 연꽃 I</span><span class="augment-item star">도금 강철</span><span class="augment-item star">후반 성장</span><span class="augment-item">생일 모임</span></div></div>
+      <div class="augment-guide"><span class="augment-tier tier-prisma">프리즘</span><div class="augment-items"><span class="augment-item star">레벨 업!</span><span class="augment-item star">출세가도</span><span class="augment-item">거대하고 강력한</span><span class="augment-item">영혼 각성</span></div></div>
     </div>
-
-    <div class="section-title" style="margin-top:20px">우주의 신 추천 (선봉대 벡스덱)</div>
-    <div class="augment-guide">
-      <div class="augment-items">
-        <span class="augment-item star">아리 (골드, 경험치)</span>
-        <span class="augment-item star">케일 (아이템)</span>
-        <span class="augment-item star">에코 (바위 게 파티, 5단계 유닛)</span>
-        <span class="augment-item star">아우렐리온 솔 (골드, 아이템)</span>
-      </div>
-    </div>
+    <div class="section-title" style="margin-top:18px">우주의 신 추천 (선봉대 벡스덱)</div>
+    <div class="augment-guide"><div class="augment-items">
+      <span class="augment-item star">아리 (골드, 경험치)</span>
+      <span class="augment-item star">케일 (아이템)</span>
+      <span class="augment-item star">에코 (바위 게 파티, 5단계 유닛)</span>
+      <span class="augment-item star">아우렐리온 솔 (골드, 아이템)</span>
+    </div></div>
   </div>
 </div>
 
+<!-- TAB 4: META -->
+<div id="tab-meta" class="tab-content">
+  <p style="color:var(--text-dim);margin-bottom:14px;font-size:12px;">현재 패치 추천 메타 덱 — 클릭하면 헥스 배치·아이템 가이드를 확인할 수 있습니다.</p>
+  <div id="metaDeckList"></div>
+</div>
+
 <script>
-const EMBLEMS = [
-  { id: 'space_groove',  name: '우주 그루브', icon: '🌌', decks: ['space_groove','vanguard_bex'] },
-  { id: 'traveler',      name: '여행자',      icon: '🧭', decks: ['corki'] },
-  { id: 'pathfinder',    name: '길잡이',      icon: '🗺️', decks: ['guide'] },
-  { id: 'vanguard',      name: '선봉대',      icon: '🛡️', decks: ['vanguard_6','vanguard_bex'] },
-  { id: 'rogue',         name: '습격자',      icon: '🗡️', decks: ['kindred'] },
-  { id: 'brawler',       name: '싸움꾼',      icon: '👊', decks: ['brawler_mai'] },
-  { id: 'star_guardian', name: '별돌보미',    icon: '⭐', decks: ['jhin_zaya'] },
-  { id: 'spirit',        name: '정령족',      icon: '🌿', decks: ['corki'] },
-  { id: 'bandit',        name: '불한당',      icon: '🎭', decks: ['corki'] },
-  { id: 'bastion',       name: '요새',        icon: '🏰', decks: ['corki','space_groove'] },
-  { id: 'nova',          name: '노바',        icon: '💥', decks: ['corki','brawler_mai'] },
-  { id: 'sniper',        name: '저격수',      icon: '🎯', decks: ['jhin_zaya'] },
-  { id: 'darkstar',      name: '암흑의 별',   icon: '🌑', decks: ['darkstar'] },
-  { id: 'challenger',    name: '도전자',      icon: '⚡', decks: ['brawler_mai'] },
-  { id: 'ancient',       name: '태고족',      icon: '🪨', decks: ['brawler_mai'] },
-  { id: 'symbiont',      name: '시균자',      icon: '🧬', decks: ['jhin_zaya'] },
+const EMBLEMS=[
+  {id:'space_groove',name:'우주 그루브',icon:'🌌',decks:['space_groove','vanguard_bex']},
+  {id:'traveler',name:'여행자',icon:'🧭',decks:['corki']},
+  {id:'pathfinder',name:'길잡이',icon:'🗺️',decks:['guide']},
+  {id:'vanguard',name:'선봉대',icon:'🛡️',decks:['vanguard_6','vanguard_bex']},
+  {id:'rogue',name:'습격자',icon:'🗡️',decks:['kindred']},
+  {id:'brawler',name:'싸움꾼',icon:'👊',decks:['brawler_mai']},
+  {id:'star_guardian',name:'별돌보미',icon:'⭐',decks:['jhin_zaya']},
+  {id:'spirit',name:'정령족',icon:'🌿',decks:['corki']},
+  {id:'bandit',name:'불한당',icon:'🎭',decks:['corki']},
+  {id:'bastion',name:'요새',icon:'🏰',decks:['corki','space_groove']},
+  {id:'nova',name:'노바',icon:'💥',decks:['corki','brawler_mai']},
+  {id:'sniper',name:'저격수',icon:'🎯',decks:['jhin_zaya']},
+  {id:'darkstar',name:'암흑의 별',icon:'🌑',decks:['darkstar']},
+  {id:'challenger',name:'도전자',icon:'⚡',decks:['brawler_mai']},
+  {id:'ancient',name:'태고족',icon:'🪨',decks:['brawler_mai']},
+  {id:'symbiont',name:'시균자',icon:'🧬',decks:['jhin_zaya']},
 ];
-
-// items 구조: { 유닛명: { role, main[], alt[] } }
-const DECKS = {
-  vanguard_bex: {
-    name: '선봉대 벡스덱', badge: '추천',
-    carries: ['벡스','누누'], tanks: ['일라오이','블리츠크랭크'], others: ['카르마','소나','바드'],
-    synergies: ['선봉대','길잡이','시간균열자'],
-    items: {
-      '벡스':         { role:'carry',   main:['구인수의 격노검','붉은 덩굴정령','마법공학 총검'],         alt:['명멸검','보석 건틀릿','거인 학살자','라바돈의 죽음모자'] },
-      '일라오이':     { role:'tank',    main:['가고일 돌갑옷','워모그의 갑옷','덤불 조끼'],               alt:['크라운가드','용의 발톱','굳건한 심장'] },
-      '누누':         { role:'tank',    main:['수호자의 맹세','적응형 투구'],                             alt:['크라운가드','워모그의 갑옷'] },
-      '바드':         { role:'support', main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'],           alt:['적응형 투구','푸른 파수꾼','모렐로노미콘','거인 학살자'] },
-      '블리츠크랭크': { role:'tank',    main:['보석 건틀릿','정의의 손길','크라운가드'],                  alt:['도적의 장갑','타격대의 철퇴','라바돈의 죽음모자'] },
-    },
-    tips: ['벡스 > 탱커 아이템 순으로 세팅','9레벨에 바드 추가 (카르마템 소나 바드 2성)','소나 → 리산드라 대체 가능','초능력 아이템 메트릭스 떴을 때 go'],
-  },
-  space_groove: {
-    name: '우주 그루브 덱', badge: '강력',
-    carries: ['리븐','제드'], tanks: ['라하스트'], others: ['모르가나'],
-    synergies: ['우주그루브 (5)','그루브'],
-    items: {
-      '리븐': { role:'carry', main:['쇼진의 창','밤끝의 칼날','우주그루브 상징'],  alt:['무한의 대검','피바라기','정복자'] },
-      '제드':  { role:'carry', main:['쇼진의 창','밤끝의 칼날','우주그루브 상징'], alt:['검은 방패','무한의 대검'] },
-    },
-    tips: ['우르프나 뒤집개 → 무조건 우주그루브 리븐','5우주그루브 > 7우주그루브 (7보단 라하스트)','요새 상징 → 리븐에게 주면 효율 최고'],
-  },
-  corki: {
-    name: '코르키 (정령족) 덱', badge: '안정',
-    carries: ['코르키','밀리오'], tanks: ['리븐','라하스트'], others: ['모르가나'],
-    synergies: ['정령족 (3)','여행자','불한당','요새'],
-    items: {
-      '코르키': { role:'carry',   main:['구인수의 격노검','쇼진의 창','최후의 속삭임'],  alt:['피바라기','무한의 대검','크라켄 학살자'] },
-      '밀리오': { role:'support', main:['구인수의 격노검','쇼진의 창'],                 alt:['불한당/정령족 상징 부여'] },
-      '리븐':   { role:'tank',    main:['여행자 상징','방어 아이템'],                   alt:['요새 상징 시 딜 전환'] },
-    },
-    tips: ['여행자 → 코르키 (매크X → 라하스트, 모르가나)','불한당 → 코르키 주다가 밀리오에게','요새 상징 → 리븐에게 (효율 최고)','노바 → 아이템 다 맞추면 우르곳으로'],
-  },
-  jhin_zaya: {
-    name: '별돌보미 자야 덱', badge: '강력',
-    carries: ['자야'], tanks: ['누누','모데카이저'], others: ['탈론','탐켄치'],
-    synergies: ['시균자 (4)','별돌보미 (3)','선봉','난동'],
-    items: {
-      '자야':   { role:'carry',   main:['구인수의 격노검','크라켄 학살자','크라켄 학살자'], alt:['피바라기','정복자','라위'] },
-      '룰루':   { role:'support', main:['구인수의 격노검','쇼진의 창','복원의 서'],         alt:['적응형 투구'] },
-      '누누':   { role:'tank',    main:['워모그의 갑옷','가고일 돌갑옷'],                   alt:['덤불 조끼','크라운가드'] },
-    },
-    tips: ['4시균자 자야 + 3별돌보미 조합','저격수/시균자 상징 → 자야덱','6렙 리롤 적당히, 7렙 마무리, 3성 다 찍기','싸움꾼 → 노바 자야 (탐켄치 대신 누누)'],
-  },
-  brawler_mai: {
-    name: '싸움꾼 마이 덱', badge: '안정',
-    carries: ['킨드레드','우르곳'], tanks: ['마이'], others: ['도전자 우르곳','도전자 미포'],
-    synergies: ['싸움꾼 (6)','도전자','태고족'],
-    items: {
-      '킨드레드': { role:'carry', main:['구인수의 격노검','크라켄 학살자','라위'],          alt:['피바라기','최후의 속삭임','정복자'] },
-      '우르곳':   { role:'carry', main:['구인수의 격노검','피바라기','거인 학살자'],         alt:['최후의 속삭임','크라켄 학살자'] },
-      '마이':     { role:'tank',  main:['싸움꾼 상징','워모그의 갑옷','가고일 돌갑옷'],     alt:['덤불 조끼'] },
-    },
-    tips: ['마이에게 싸움꾼 상징 → 6싸움꾼','킨드 딜템 → 우르곳에게 딜템 몰아주기','노바 상징: 마이→아이템 맞추면 우르곳으로','도전자 상징: 우르곳 or 미포'],
-  },
-  vanguard_6: {
-    name: '6 선봉대 덱', badge: '고벨류',
-    carries: ['카르마','꼬정'], tanks: ['선봉대 5마리'], others: ['르블랑','소나'],
-    synergies: ['선봉대 (6)','길잡이'],
-    items: {
-      '카르마': { role:'carry',   main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'],  alt:['모렐로노미콘','보석 건틀릿'] },
-      '꼬정':   { role:'tank',    main:['선봉대 상징','가고일 돌갑옷','워모그의 갑옷'],    alt:['덤불 조끼','크라운가드'] },
-      '르블랑': { role:'support', main:['쇼진의 창','공허의 지팡이'],                     alt:['라바돈의 죽음모자'] },
-    },
-    tips: ['카르마, 꼬정 필수','꼬정에게 선봉대 상징 → 6선봉대 즉시 세팅','선봉대 5마리 + 르블랑/소나 + 고벨류'],
-  },
-  guide: {
-    name: '5 길잡이 덱', badge: '벨류',
-    carries: ['소나','꼬정'], tanks: ['일라오이'], others: ['리산드라','르블랑'],
-    synergies: ['길잡이 (5)'],
-    items: {
-      '소나':     { role:'carry',   main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'], alt:['모렐로노미콘'] },
-      '일라오이': { role:'tank',    main:['가고일 돌갑옷','워모그의 갑옷','덤불 조끼'],     alt:['크라운가드'] },
-    },
-    tips: ['5길잡이: 소나, 꼬정, 일라, 리산/르블랑','길잡이 상징 → 벨류덱 조합 가능'],
-  },
-  darkstar: {
-    name: '6 암흑의 별 덱', badge: '강력',
-    carries: ['카이사','자야','아우솔'], tanks: [], others: [],
-    synergies: ['암흑의 별 (6)'],
-    items: {
-      '카이사': { role:'carry', main:['구인수의 격노검','크라켄 학살자','피바라기'],          alt:['최후의 속삭임','정복자'] },
-      '자야':   { role:'carry', main:['구인수의 격노검','크라켄 학살자','크라켄 학살자'],    alt:['피바라기','공속 부여 아이템'] },
-      '아우솔': { role:'carry', main:['라바돈의 죽음모자','공허의 지팡이','모렐로노미콘'],   alt:['보석 건틀릿','거인 학살자'] },
-    },
-    tips: ['카이사 리롤덱 → 리븐','진 → 자야 전환','AP 아이템 많으면 아우솔','암별 상징 → 딜러 아무나에게'],
-  },
-  kindred: {
-    name: '킨드레드 (습격자) 덱', badge: '특수',
-    carries: ['킨드레드'], tanks: [], others: [],
-    synergies: ['습격자'],
-    items: {
-      '킨드레드': { role:'carry', main:['구인수의 격노검','습격자상징 + 크라켄 학살자','라위'], alt:['피바라기','최후의 속삭임'] },
-    },
-    tips: ['습격자 상징 확보 시 킨드레드덱 전환','구인수, 습격자상징+크라켄, 라위 방파 세팅'],
-  },
+const DECKS={
+  vanguard_bex:{name:'선봉대 벡스덱',badge:'추천',carries:['벡스','누누'],tanks:['일라오이','블리츠크랭크'],others:['카르마','소나','바드'],synergies:['선봉대','길잡이','시간균열자'],items:{
+    '벡스':{role:'carry',main:['구인수의 격노검','거인 학살자','보석 건틀릿'],alt:['라바돈의 죽음모자','붉은 덩굴정령','타격대의 철퇴']},
+    '일라오이':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷','정령의 형상'],alt:['수호자의 맹세','덤불 조끼']},
+    '누누':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['수호자의 맹세']},
+    '바드':{role:'support',main:['라바돈의 죽음모자','보석 건틀릿','거인 학살자'],alt:['타격대의 철퇴','공허의 지팡이']},
+  },tips:['벡스 > 탱커 아이템 순으로 세팅','9레벨에 바드 추가','소나 → 리산드라 대체 가능']},
+  space_groove:{name:'우주 그루브 덱',badge:'강력',carries:['리븐','제드'],tanks:['라하스트'],others:['모르가나'],synergies:['우주그루브 (5)'],items:{
+    '리븐':{role:'carry',main:['피바라기','스테락의 도전','거인의 결의'],alt:['거인 학살자','수호 천사']},
+    '제드':{role:'carry',main:['쇼진의 창','피바라기'],alt:['무한의 대검']},
+  },tips:['5우주그루브 > 7우주그루브','요새 상징 → 리븐에게']},
+  corki:{name:'코르키 (정령족) 덱',badge:'안정',carries:['코르키','밀리오'],tanks:['리븐','라하스트'],others:['모르가나'],synergies:['정령족 (3)','여행자','불한당'],items:{
+    '코르키':{role:'carry',main:['명멸검','최후의 속삭임','타격대의 철퇴'],alt:['거인 학살자','구인수의 격노검']},
+    '밀리오':{role:'support',main:['명멸검','최후의 속삭임'],alt:['정령족 상징']},
+    '리븐':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['요새 상징 시 딜 전환']},
+  },tips:['여행자 → 코르키','요새 상징 → 리븐에게']},
+  jhin_zaya:{name:'별돌보미 자야 덱',badge:'강력',carries:['자야'],tanks:['누누','모데카이저'],others:['탈론','탐켄치'],synergies:['시균자 (4)','별돌보미 (3)'],items:{
+    '자야':{role:'carry',main:['크라켄의 분노','붉은 덩굴정령','구인수의 격노검'],alt:['명멸검','무한의 대검']},
+    '진':{role:'carry',main:['무한의 대검','거인 학살자','타격대의 철퇴'],alt:['명멸검','최후의 속삭임']},
+    '누누':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['수호자의 맹세']},
+  },tips:['4시균자+3별돌보미 목표','저격수/시균자 상징 → 자야']},
+  brawler_mai:{name:'싸움꾼 마이 덱',badge:'안정',carries:['킨드레드','우르곳'],tanks:['마이'],others:['도전자 우르곳'],synergies:['싸움꾼 (6)','도전자'],items:{
+    '마이':{role:'carry',main:['구인수의 격노검','무한의 대검','명멸검'],alt:['거인 학살자','쇼진의 창']},
+    '킨드레드':{role:'carry',main:['구인수의 격노검','크라켄의 분노','최후의 속삭임'],alt:['거인 학살자','붉은 덩굴정령']},
+    '우르곳':{role:'carry',main:['거인 학살자','수은','무한의 대검'],alt:['스테락의 도전','명멸검']},
+  },tips:['마이에게 싸움꾼 상징 → 6싸움꾼','킨드→우르곳 딜템 몰아주기']},
+  vanguard_6:{name:'6 선봉대 덱',badge:'고벨류',carries:['카르마','꼬정'],tanks:['선봉대 5마리'],others:['르블랑','소나'],synergies:['선봉대 (6)','길잡이'],items:{
+    '카르마':{role:'carry',main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'],alt:['보석 건틀릿']},
+    '꼬정':{role:'tank',main:['선봉대 상징','가고일 돌갑옷','워모그의 갑옷'],alt:['덤불 조끼']},
+  },tips:['카르마, 꼬정 필수','꼬정에게 선봉대 상징']},
+  guide:{name:'5 길잡이 덱',badge:'벨류',carries:['소나','꼬정'],tanks:['일라오이'],others:['리산드라','르블랑'],synergies:['길잡이 (5)'],items:{
+    '소나':{role:'carry',main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'],alt:['모렐로노미콘']},
+    '일라오이':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷','덤불 조끼'],alt:['크라운가드']},
+  },tips:['5길잡이: 소나, 꼬정, 일라, 리산/르블랑']},
+  darkstar:{name:'6 암흑의 별 덱',badge:'강력',carries:['카이사','자야','아우솔'],tanks:[],others:[],synergies:['암흑의 별 (6)'],items:{
+    '카이사':{role:'carry',main:['무한의 대검','쇼진의 창','거인 학살자'],alt:['최후의 속삭임','명멸검']},
+    '자야':{role:'carry',main:['크라켄의 분노','붉은 덩굴정령','구인수의 격노검'],alt:['명멸검','무한의 대검']},
+    '아우솔':{role:'carry',main:['라바돈의 죽음모자','보석 건틀릿','타격대의 철퇴'],alt:['거인 학살자']},
+  },tips:['AP 아이템 많으면 아우솔','암별 상징 → 딜러 아무나']},
+  kindred:{name:'킨드레드 (습격자) 덱',badge:'특수',carries:['킨드레드'],tanks:[],others:[],synergies:['습격자'],items:{
+    '킨드레드':{role:'carry',main:['구인수의 격노검','크라켄의 분노','최후의 속삭임'],alt:['거인 학살자','붉은 덩굴정령']},
+  },tips:['습격자 상징 확보 시 전환']},
 };
+const META_DECKS=[
+  {id:'space_samira',name:'우주 그루브 사미라',hot:true,difficulty:'보통',
+   synergies:[{name:'우주 그루브',count:7},{name:'요새',count:2},{name:'선봉대',count:2},{name:'저격수',count:1},{name:'불한당',count:1}],
+   board:{'오른':{row:3,col:1,role:'tank'},'나서스':{row:3,col:3,role:'tank'},'람머스':{row:3,col:5,role:'tank'},'블리츠크랭크':{row:2,col:0,role:'tank'},'그웬':{row:2,col:3,role:'carry'},'쉔':{row:2,col:5,role:'tank'},'나미':{row:0,col:1,role:'support'},'사미라':{row:0,col:3,role:'carry'},'티모':{row:0,col:5,role:'carry'}},
+   items:{'사미라':{role:'carry',main:['쇼진의 창','죽음의 검','최후의 속삭임'],alt:['타격대의 철퇴','거인 학살자']},'오른':{role:'tank',main:['가고일 돌갑옷','정령의 형상','워모그의 갑옷'],alt:['덤불 조끼']},'나미':{role:'support',main:['쇼진의 창','라바돈의 죽음모자','붉은 덩굴정령'],alt:['보석 건틀릿']}},
+   overview:['덱 난이도: 보통','초반 시간균열자·우주그루브 중 2성 유닛 유동적 활용','하챔복·리롤 증강 권장, 50골드 모아 7레벨에서 3성작','8레벨: 쉔↔람머스, 누누/자야 등 유동 활용'],
+   gods:['바루스 (하챔복, 3단계 상점)','야스오 (칸 강화)','아리 (골드)','케일 (아이템)'],
+   link:'https://lolchess.gg/builder/guide/1d7ca782800b77b915e6babb5d5ce3033b50e691?type=guide'},
+  {id:'vanguard_bard_sona',name:'선봉대 바드 소나',hot:false,difficulty:'어려움',
+   synergies:[{name:'선봉대',count:6},{name:'길잡이',count:5},{name:'시간균열자',count:2}],
+   board:{'누누':{row:3,col:0,role:'tank'},'일라오이':{row:3,col:2,role:'tank'},'블리츠크랭크':{row:3,col:4,role:'tank'},'카르마':{row:3,col:6,role:'support'},'르블랑':{row:1,col:1,role:'support'},'소나':{row:0,col:2,role:'carry'},'바드':{row:0,col:4,role:'carry'},'리산드라':{row:0,col:6,role:'support'}},
+   items:{'바드':{role:'carry',main:['라바돈의 죽음모자','보석 건틀릿','거인 학살자'],alt:['타격대의 철퇴']},'소나':{role:'carry',main:['쇼진의 창','라바돈의 죽음모자','공허의 지팡이'],alt:['모렐로노미콘']},'일라오이':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷','정령의 형상'],alt:['수호자의 맹세']}},
+   overview:['덱 난이도: 어려움','6선봉대 + 5길잡이 활성화 목표','9레벨에 바드·소나 동시 2성 운영','시간균열자 2 위해 누누 or 카시오페아 유지'],
+   gods:['아리 (골드, 경험치)','케일 (아이템)','에코 (5단계 유닛)'],
+   link:'https://lolchess.gg/builder/guide/5099a1f3507f1526fdda56382b3751d5899ec483?type=guide'},
+  {id:'starsguardian_xayah',name:'별돌보미 자야',hot:false,difficulty:'어려움',
+   synergies:[{name:'시균자',count:4},{name:'별돌보미',count:3},{name:'선봉대',count:2},{name:'저격수',count:2}],
+   board:{'누누':{row:3,col:1,role:'tank'},'모데카이저':{row:3,col:3,role:'tank'},'탈론':{row:3,col:5,role:'tank'},'탐켄치':{row:1,col:0,role:'tank'},'루루':{row:1,col:5,role:'support'},'진':{row:0,col:1,role:'carry'},'자야':{row:0,col:3,role:'carry'},'소라카':{row:0,col:5,role:'support'}},
+   items:{'자야':{role:'carry',main:['크라켄의 분노','붉은 덩굴정령','구인수의 격노검'],alt:['명멸검','무한의 대검']},'진':{role:'carry',main:['무한의 대검','거인 학살자','타격대의 철퇴'],alt:['명멸검']},'누누':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['수호자의 맹세']}},
+   overview:['덱 난이도: 어려움','4시균자+3별돌보미 목표','별돌보미 순서: 산→메달→우물→뱀','저격수 상징 → 자야에게'],
+   gods:['바루스 (하챔복)','아리 (골드)','케일 (아이템)'],
+   link:'https://lolchess.gg/builder/guide/c906c5b2ec5232d0a0e20ef173679de1a34ad2aa?type=guide'},
+  {id:'nova_graves_vex',name:'N.O.V.A. 그레이브즈 벡스',hot:false,difficulty:'어려움',
+   synergies:[{name:'N.O.V.A.',count:4},{name:'선봉대',count:4},{name:'길잡이',count:2}],
+   board:{'일라오이':{row:3,col:0,role:'tank'},'누누':{row:3,col:2,role:'tank'},'블리츠크랭크':{row:3,col:4,role:'tank'},'카르마':{row:2,col:5,role:'support'},'그레이브즈':{row:0,col:1,role:'carry'},'벡스':{row:0,col:3,role:'carry'},'우르곳':{row:0,col:5,role:'carry'}},
+   items:{'벡스':{role:'carry',main:['구인수의 격노검','거인 학살자','보석 건틀릿'],alt:['라바돈의 죽음모자']},'그레이브즈':{role:'carry',main:['구인수의 격노검','최후의 속삭임','거인 학살자'],alt:['명멸검']},'일라오이':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷','정령의 형상'],alt:['덤불 조끼']}},
+   overview:['덱 난이도: 어려움','4 N.O.V.A. + 4선봉대 목표','그레이브즈에게 노바 상징 부여 권장','9레벨: 우르곳 추가'],
+   gods:['아우렐리온 솔 (골드, 아이템)','야스오 (칸 강화)','아리 (골드)'],
+   link:'https://lolchess.gg/builder/guide/0538e5e392caa05b41e302b18e0aefe2d04f6f95?type=guide'},
+  {id:'spirit_corki_riven',name:'정령족 코르키 리븐',hot:false,difficulty:'보통',
+   synergies:[{name:'정령족',count:3},{name:'여행자',count:3},{name:'불한당',count:2},{name:'요새',count:2}],
+   board:{'라하스트':{row:3,col:1,role:'tank'},'리븐':{row:3,col:3,role:'tank'},'모르가나':{row:3,col:5,role:'support'},'밀리오':{row:1,col:4,role:'support'},'코르키':{row:0,col:2,role:'carry'},'야스오':{row:0,col:4,role:'carry'},'니코':{row:0,col:6,role:'carry'}},
+   items:{'코르키':{role:'carry',main:['명멸검','최후의 속삭임','타격대의 철퇴'],alt:['거인 학살자','구인수의 격노검']},'밀리오':{role:'support',main:['쇼진의 창','라바돈의 죽음모자'],alt:['붉은 덩굴정령']},'리븐':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['요새 상징 시 딜 전환']}},
+   overview:['덱 난이도: 보통','정령족 3+여행자 3 목표','여행자 상징 → 코르키에게','요새 상징 → 리븐에게 최적'],
+   gods:['아리 (골드)','케일 (아이템)','야스오 (칸 강화)'],
+   link:'https://lolchess.gg/builder/guide/7a5aa7ad2b5817b9a47d0c2ab920f5336d5c0684?type=guide'},
+  {id:'meka_asol',name:'메카 아우솔 (동특)',hot:false,difficulty:'쉬움',
+   synergies:[{name:'메카',count:4},{name:'암흑의 별',count:3},{name:'선봉대',count:2}],
+   board:{'카르마':{row:3,col:0,role:'support'},'누누':{row:3,col:2,role:'tank'},'말파이트':{row:3,col:4,role:'tank'},'르블랑':{row:1,col:1,role:'support'},'헤카림':{row:1,col:5,role:'tank'},'카이사':{row:0,col:2,role:'carry'},'아우솔':{row:0,col:4,role:'carry'}},
+   items:{'아우솔':{role:'carry',main:['라바돈의 죽음모자','보석 건틀릿','타격대의 철퇴'],alt:['거인 학살자','공허의 지팡이']},'카이사':{role:'carry',main:['무한의 대검','쇼진의 창','거인 학살자'],alt:['최후의 속삭임','명멸검']},'누누':{role:'tank',main:['가고일 돌갑옷','워모그의 갑옷'],alt:['수호자의 맹세']}},
+   overview:['덱 난이도: 쉬움','메카 4 + 암흑의 별 3 목표','AP 아이템 많을 때 강력','동특 구성으로 시너지 극대화'],
+   gods:['아우렐리온 솔 (골드, 아이템)','케일 (아이템)','아리 (골드)'],
+   link:'https://lolchess.gg/builder/guide/a16e9b50e8465c8086cd5a898705e1996cf02fcb?type=guide'},
+];
+</script>
 
-// ── EMBLEM LOGIC ──
-let selected = new Set();
+<script>
+// ── TABS ──
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const idx=['emblem','early','augment','meta'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
 
-function renderEmblems() {
-  const grid = document.getElementById('emblemGrid');
-  grid.innerHTML = '';
-  EMBLEMS.forEach(e => {
-    const card = document.createElement('div');
-    card.className = 'emblem-card' + (selected.has(e.id) ? ' selected' : '');
-    card.innerHTML = `<div class="emblem-icon">${e.icon}</div><div><div class="emblem-name">${e.name}</div></div><div class="emblem-check"></div>`;
-    card.onclick = () => { selected.has(e.id) ? selected.delete(e.id) : selected.add(e.id); renderEmblems(); renderResult(); };
+// ── EMBLEM ──
+let selected=new Set();
+function renderEmblems(){
+  const grid=document.getElementById('emblemGrid');
+  grid.innerHTML='';
+  EMBLEMS.forEach(e=>{
+    const card=document.createElement('div');
+    card.className='emblem-card'+(selected.has(e.id)?' selected':'');
+    card.innerHTML=`<div class="emblem-icon">${e.icon}</div><div class="emblem-name">${e.name}</div><div class="emblem-check"></div>`;
+    card.onclick=()=>{selected.has(e.id)?selected.delete(e.id):selected.add(e.id);renderEmblems();renderResult();};
     grid.appendChild(card);
   });
 }
-
-function resetEmblems() { selected.clear(); renderEmblems(); renderResult(); }
-
-function getDeckScores() {
-  const scores = {};
-  selected.forEach(id => {
-    const emb = EMBLEMS.find(e => e.id === id);
-    if (emb) emb.decks.forEach(d => { scores[d] = (scores[d] || 0) + 1; });
+function resetEmblems(){selected.clear();renderEmblems();renderResult();}
+function getDeckScores(){
+  const s={};
+  selected.forEach(id=>{const e=EMBLEMS.find(x=>x.id===id);if(e)e.decks.forEach(d=>{s[d]=(s[d]||0)+1;});});
+  return Object.entries(s).sort((a,b)=>b[1]-a[1]);
+}
+function rolePill(r){const m={carry:'캐리',tank:'탱커',support:'서포트'};return `<span class="role-pill role-${r}">${m[r]||r}</span>`;}
+function renderItems(items){
+  if(!items||!Object.keys(items).length)return'';
+  let h='<div class="info-box"><div class="info-box-title">아이템 가이드</div>';
+  Object.entries(items).forEach(([u,d])=>{
+    h+=`<div class="item-unit"><div class="item-unit-name">${u} ${rolePill(d.role)}</div>`;
+    if(d.main&&d.main.length)h+=`<div class="item-row-label">추천</div><div class="item-tags">${d.main.map(i=>`<span class="item-tag main">${i}</span>`).join('')}</div>`;
+    if(d.alt&&d.alt.length)h+=`<div class="item-row-label" style="margin-top:3px">대체</div><div class="item-tags">${d.alt.map(i=>`<span class="item-tag alt">${i}</span>`).join('')}</div>`;
+    h+='</div>';
   });
-  return Object.entries(scores).sort((a,b) => b[1]-a[1]);
+  return h+'</div>';
+}
+function renderResult(){
+  const panel=document.getElementById('resultPanel');
+  if(!selected.size){panel.innerHTML=`<div class="result-empty"><div style="font-size:28px;margin-bottom:10px">🏷️</div><div>상징을 선택하면 덱 추천이 나타납니다</div></div>`;return;}
+  const scores=getDeckScores();
+  const names=[...selected].map(id=>EMBLEMS.find(e=>e.id===id)?.name).filter(Boolean);
+  let h=`<div><div style="margin-bottom:12px"><div class="section-title" style="margin-bottom:5px">선택된 상징</div><div class="tag-row">${names.map(n=>`<span class="tag selected-emblem">${n}</span>`).join('')}</div></div>`;
+  if(!scores.length){h+='<div style="color:var(--text-dim)">매핑된 덱이 없습니다.</div></div>';panel.innerHTML=h;return;}
+  const[topId,topScore]=scores[0];const deck=DECKS[topId];
+  if(!deck){panel.innerHTML=h+'</div>';return;}
+  h+=`<div class="deck-header"><span class="deck-name">${deck.name}</span><span class="deck-badge">${deck.badge}</span>${topScore>1?`<span style="font-size:11px;color:var(--green)">상징 ${topScore}개 매칭</span>`:''}</div>`;
+  h+=`<div class="info-row"><div class="info-box" style="margin-bottom:0"><div class="info-box-title">핵심 캐리</div><div class="unit-chips">${deck.carries.map(u=>`<span class="unit-chip carry">${u}</span>`).join('')}</div></div><div class="info-box" style="margin-bottom:0"><div class="info-box-title">탱커/서포트</div><div class="unit-chips">${[...deck.tanks,...deck.others].map(u=>`<span class="unit-chip tank">${u}</span>`).join('')}</div></div></div>`;
+  h+=renderItems(deck.items);
+  if(deck.tips&&deck.tips.length)h+=`<div class="info-box"><div class="info-box-title">전략 팁</div><ul class="tip-list">${deck.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+  if(scores.length>1)h+=`<div style="margin-top:8px;font-size:11px;color:var(--text-dim)">기타 후보: ${scores.slice(1,3).map(([id])=>DECKS[id]?.name||id).filter(Boolean).join(', ')}</div>`;
+  h+='</div>';panel.innerHTML=h;
 }
 
-function rolePill(role) {
-  const map = { carry:'캐리', tank:'탱커', support:'서포트' };
-  return `<span class="role-pill role-${role}">${map[role]||role}</span>`;
+// ── EARLY ──
+function toggleDeck(header){
+  const body=header.nextElementSibling;
+  const open=body.classList.toggle('open');
+  header.classList.toggle('open',open);
 }
 
-function renderItems(items) {
-  if (!items || !Object.keys(items).length) return '';
-  let html = '<div class="info-box"><div class="info-box-title">아이템 가이드</div>';
-  Object.entries(items).forEach(([unit, data]) => {
-    html += `<div class="item-unit">
-      <div class="item-unit-name">${unit} ${rolePill(data.role)}</div>`;
-    if (data.main && data.main.length) {
-      html += `<div class="item-row-label">추천</div><div class="item-tags">${data.main.map(i=>`<span class="item-tag main">${i}</span>`).join('')}</div>`;
+// ── META – HEX BOARD ──
+function buildBoard(board){
+  const ROWS=4,COLS=7;
+  const grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  Object.entries(board).forEach(([name,pos])=>{if(pos.row<ROWS&&pos.col<COLS)grid[pos.row][pos.col]={name,role:pos.role};});
+  let h='<div class="hex-board">';
+  for(let r=ROWS-1;r>=0;r--){
+    h+=`<div class="hex-row${r%2===1?' offset':''}">`;
+    for(let c=0;c<COLS;c++){
+      const u=grid[r][c];
+      if(u){const short=u.name.length>4?u.name.slice(0,4)+'…':u.name;h+=`<div class="hex ${u.role}"><div class="hex-inner"><div class="hex-name">${short}</div><div class="hex-dot"></div></div></div>`;}
+      else h+='<div class="hex empty"><div class="hex-inner"></div></div>';
     }
-    if (data.alt && data.alt.length) {
-      html += `<div class="item-row-label" style="margin-top:4px">대체</div><div class="item-tags">${data.alt.map(i=>`<span class="item-tag alt">${i}</span>`).join('')}</div>`;
-    }
-    html += '</div>';
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function buildSynergy(synergies){
+  return '<div>'+synergies.map(s=>`<div class="syn-row"><span class="syn-count-badge active">${s.count}</span><span style="font-size:12px">${s.name}</span></div>`).join('')+'</div>';
+}
+function buildItemsPanel(items){
+  return Object.entries(items).map(([u,d])=>`<div class="meta-champ-item"><div class="meta-champ-name">${u} ${rolePill(d.role)}</div><div class="item-pill-label">추천</div><div class="item-pills">${(d.main||[]).map(i=>`<span class="item-pill main">${i}</span>`).join('')}</div><div class="item-pill-label">대체</div><div class="item-pills">${(d.alt||[]).map(i=>`<span class="item-pill alt">${i}</span>`).join('')}</div></div>`).join('');
+}
+function toggleMeta(card){card.classList.toggle('open');}
+function renderMetaDecks(){
+  const c=document.getElementById('metaDeckList');c.innerHTML='';
+  META_DECKS.forEach(deck=>{
+    const dc=deck.difficulty==='쉬움'?'diff-easy':deck.difficulty==='어려움'?'diff-hard':'diff-medium';
+    const chips=deck.synergies.slice(0,4).map(s=>`<span class="syn-chip">${s.name} ${s.count}</span>`).join('');
+    const el=document.createElement('div');
+    el.className='meta-deck-card';
+    el.innerHTML=`
+      <div class="meta-deck-header" onclick="toggleMeta(this.closest('.meta-deck-card'))">
+        <span class="meta-deck-title">${deck.name}</span>
+        ${deck.hot?'<span class="hot-badge">🔥 HOT</span>':''}
+        <span class="diff-badge ${dc}">${deck.difficulty}</span>
+        <div class="meta-header-synergies">${chips}</div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="meta-deck-body">
+        <div class="meta-body-inner">
+          <div class="meta-col-synergy"><div class="section-title" style="margin-bottom:8px">시너지</div>${buildSynergy(deck.synergies)}</div>
+          <div class="meta-col-board">
+            <div class="section-title" style="margin-bottom:8px">배치 (위=앞열·탱커, 아래=뒷열·캐리)</div>
+            ${buildBoard(deck.board)}
+            <div style="margin-top:6px;display:flex;gap:10px;font-size:10px;color:var(--text-dim)"><span style="color:#f0c040">■ 캐리</span><span style="color:#60a0e0">■ 탱커</span><span style="color:#a070e0">■ 서포트</span></div>
+          </div>
+          <div class="meta-col-items"><div class="section-title" style="margin-bottom:8px">아이템 가이드</div>${buildItemsPanel(deck.items)}</div>
+        </div>
+        <div class="meta-bottom">
+          <div><div class="meta-guide-title">개요</div><ul class="guide-list">${deck.overview.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+          <div>
+            <div class="meta-guide-title">우주의 신 추천</div>
+            <div class="god-pills">${deck.gods.map(g=>`<span class="god-pill">${g}</span>`).join('')}</div>
+            <a class="guide-link-btn" href="${deck.link}" target="_blank">🔗 lolchess.gg 공략 보기</a>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(el);
   });
-  html += '</div>';
-  return html;
 }
-
-function renderResult() {
-  const panel = document.getElementById('resultPanel');
-  if (!selected.size) {
-    panel.innerHTML = `<div class="result-empty"><div class="hint">🏷️</div><div>상징을 선택하면 덱 추천이 나타납니다</div></div>`;
-    return;
-  }
-  const scores = getDeckScores();
-  const selectedNames = [...selected].map(id => EMBLEMS.find(e=>e.id===id)?.name).filter(Boolean);
-
-  let html = `<div class="deck-result">`;
-  html += `<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:6px">선택된 상징</div><div class="tag-row">${selectedNames.map(n=>`<span class="tag selected-emblem">${n}</span>`).join('')}</div></div>`;
-
-  if (!scores.length) { html += `<div style="color:var(--text-dim)">매핑된 덱이 없습니다.</div></div>`; panel.innerHTML = html; return; }
-
-  const [topId, topScore] = scores[0];
-  const deck = DECKS[topId];
-  if (!deck) { panel.innerHTML = html + '</div>'; return; }
-
-  html += `<div class="deck-header"><span class="deck-name">${deck.name}</span><span class="deck-badge">${deck.badge}</span>${topScore>1?`<span style="font-size:12px;color:var(--green)">상징 ${topScore}개 매칭</span>`:''}</div>`;
-
-  html += `<div class="info-row">
-    <div class="info-box" style="margin-bottom:0">
-      <div class="info-box-title">핵심 캐리</div>
-      <div class="unit-chips">${deck.carries.map(u=>`<span class="unit-chip carry">${u}</span>`).join('')}</div>
-    </div>
-    <div class="info-box" style="margin-bottom:0">
-      <div class="info-box-title">탱커 / 서브</div>
-      <div class="unit-chips">${[...deck.tanks,...deck.others].map(u=>`<span class="unit-chip tank">${u}</span>`).join('')}</div>
-    </div>
-  </div>`;
-
-  html += `<div class="info-box"><div class="info-box-title">목표 시너지</div><div class="synergy-tags">${deck.synergies.map(s=>`<span class="synergy-tag">${s}</span>`).join('')}</div></div>`;
-
-  html += renderItems(deck.items);
-
-  if (deck.tips && deck.tips.length) {
-    html += `<div class="info-box"><div class="info-box-title">운영 팁</div><ul class="tip-list">${deck.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
-  }
-
-  if (scores.length > 1) {
-    html += `<div style="margin-top:14px"><div class="section-title" style="margin-bottom:8px">대안 덱</div><div class="multi-result">`;
-    scores.slice(1,3).forEach(([id, sc]) => {
-      const d = DECKS[id]; if (!d) return;
-      html += `<div class="candidate"><div class="candidate-rank">대안 (상징 ${sc}개 매칭)</div><div class="candidate-name">${d.name}</div><div class="candidate-reason">${d.tips[0]||''}</div></div>`;
-    });
-    html += `</div></div>`;
-  }
-
-  html += `</div>`;
-  panel.innerHTML = html;
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['emblem','early','augment'][i]===tab));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-}
-
-function toggleDeck(header) {
-  const body = header.nextElementSibling;
-  body.classList.toggle('open', !body.classList.contains('open'));
-  header.classList.toggle('open', !header.classList.contains('open'));
-}
-
-renderEmblems();
+document.addEventListener('DOMContentLoaded',()=>{renderEmblems();renderMetaDecks();});
 </script>
 </body>
 </html>
